@@ -93,7 +93,47 @@
                     }
                 ]
             }
-        },        
+        },
+        {
+            "apiVersion": "[variables('apiVersion')]",
+            "name": "loadBalancer",
+            "type": "Microsoft.Network/loadBalancers",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "Microsoft.Network/publicIPAddresses/publicIp"
+            ],
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "LBFE",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses','publicIp')]"
+                            }
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "LBBAP"
+                    }
+                ],
+                "inboundNatRules": [
+                    {
+                        "name": "rdp",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers','loadBalancer'),'/frontendIPConfigurations/LBFE')]"
+                            },
+                            "protocol": "tcp",
+                            "frontendPort": "[parameters('rdpPort')]",
+                            "backendPort": 3389,
+                            "enableFloatingIP": false
+                        }
+                    }
+                ]
+            }
+        },
         {
             "apiVersion": "[variables('apiVersion')]",
             "type": "Microsoft.Network/networkInterfaces",
