@@ -28,9 +28,9 @@
                 "description": "The password for the administrator account of the new VM"
             }
         },
-        "rdpPort": {
+        "sshPort": {
             "type": "int",
-            "defaultValue": 50001,
+            "defaultValue": 22,
             "metadata": {
                 "description": "Public port number for RDP"
             }
@@ -41,14 +41,14 @@
     },
     "variables": {
         "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'sardpvm')]",
-        "virtualNetworkName": "rdpVNET",
+        "virtualNetworkName": "sshVNET",
         "vnetAddressRange": "10.0.0.0/16",
         "subnetAddressRange": "10.0.0.0/24",
         "subnetName": "Subnet",
         "subnet-id": "[concat(resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName')),'/subnets/',variables('subnetName'))]",
-        "imagePublisher": "MicrosoftWindowsServer",
-        "imageOffer": "WindowsServer",
-        "imageSku": "2012-R2-Datacenter",
+        "imagePublisher": "Canonical",
+        "imageOffer": "UbuntuServer",
+        "imageSku": "14.04-LTS",
         "apiVersion": "2015-06-15"
     },
     "resources": [
@@ -93,47 +93,7 @@
                     }
                 ]
             }
-        },
-        {
-            "apiVersion": "[variables('apiVersion')]",
-            "name": "loadBalancer",
-            "type": "Microsoft.Network/loadBalancers",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "Microsoft.Network/publicIPAddresses/publicIp"
-            ],
-            "properties": {
-                "frontendIPConfigurations": [
-                    {
-                        "name": "LBFE",
-                        "properties": {
-                            "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses','publicIp')]"
-                            }
-                        }
-                    }
-                ],
-                "backendAddressPools": [
-                    {
-                        "name": "LBBAP"
-                    }
-                ],
-                "inboundNatRules": [
-                    {
-                        "name": "rdp",
-                        "properties": {
-                            "frontendIPConfiguration": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers','loadBalancer'),'/frontendIPConfigurations/LBFE')]"
-                            },
-                            "protocol": "tcp",
-                            "frontendPort": "[parameters('rdpPort')]",
-                            "backendPort": 3389,
-                            "enableFloatingIP": false
-                        }
-                    }
-                ]
-            }
-        },
+        },        
         {
             "apiVersion": "[variables('apiVersion')]",
             "type": "Microsoft.Network/networkInterfaces",
@@ -203,7 +163,7 @@
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": "true",
-                        "storageUri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net')]"
+                        "storageUri": "[concat('http://',variables('storageAccountName'),'.blob.core.chinacloudapi.cn')]"
                     }
                 }
             }
